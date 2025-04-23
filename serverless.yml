@@ -6,7 +6,11 @@ provider:
   name: aws
   runtime: nodejs18.x
   region: us-east-1
-  stage: dev
+  iamRoleStatements:
+    - Effect: Allow
+      Action: "*"
+      Resource: "*"
+  stage: de
 
 functions:
   hello:
@@ -15,3 +19,38 @@ functions:
       - http:
           path: /hello
           method: get
+
+  addTodo:
+    handler: src/addTodo.handler
+    events:
+      - http:
+          path: /addTodo
+          method: post
+
+  fetchTodo:
+    handler: src/fetchTodo.handler
+    events:
+      - http:
+          path: /fetchTodo
+          method: get
+
+  fetchByIdTodo:
+    handler: src/fetchByIdTodo.handler
+    events:
+      - http:
+          path: /fetchByIdTodo/{id}
+          method: get
+
+resources:
+  Resources:
+    TodoTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: todo-table
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
